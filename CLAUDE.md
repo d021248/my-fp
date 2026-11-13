@@ -63,9 +63,6 @@ src/main/java/d021248/mytry/
 │   ├── typeclass/           Eq, Show, Semigroup, Monoid
 │   ├── typelevel/           HList, type witnesses, type-level programming
 │   └── zipper/              ListZipper — focus + context, comonad operations
-│
-└── core/utils/
-    └── Stopwatch.java       wall-clock timer used by fp/functions/decorators
 ```
 
 ### Canonical Types
