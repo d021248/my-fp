@@ -41,6 +41,9 @@ public record TuringMachine(Map<Key, Rule> table) {
   /// Transition outcome: what to write, where to move, what state to enter next.
   public record Rule(TmState nextState, Symbol write, Direction move) {}
 
+  /// The result of a counted run: final halted configuration plus total step count.
+  public record RunStats(Configuration halted, long steps) {}
+
   // -------------------------------------------------------------------------
   // Execution
   // -------------------------------------------------------------------------
@@ -72,6 +75,58 @@ public record TuringMachine(Map<Key, Rule> table) {
   public Configuration run(Configuration initial) {
     return Bounce.run(step(initial));
   }
+
+  /// Runs the machine to completion, counting every transition.
+  ///
+  /// Unlike `run`, this iterates `transition` directly in a loop —
+  /// no per-step `Bounce` allocation, O(1) stack depth, minimal GC pressure.
+  /// Use this when the step count matters or when the machine runs millions of steps.
+  public RunStats runStats(Configuration initial) {
+    var config = initial;
+    long steps = 0;
+    while (!config.halted()) {
+      config = transition(config);
+      steps++;
+    }
+    return new RunStats(config, steps);
+  }
+
+  /// Runs the machine using a mutable `HashMap` tape — O(1) per step instead of O(tape length).
+  ///
+  /// The `Tape` / `ListZipper` design is immutable and pedagogically pure, but each move
+  /// copies the neighbour list, making it O(n) per step.  For machines with millions of steps
+  /// that would be prohibitively slow.  `runFast` bypasses the immutable tape and uses a
+  /// `HashMap<Integer, Symbol>` keyed by cell index, keeping each step at O(1) amortised.
+  ///
+  /// Returns step count and mark count; no `Configuration` is reconstructed.
+  public FastStats runFast(TmState.Run startState) {
+    var tape = new java.util.HashMap<Integer, Symbol>();
+    var head = new int[] {0};
+    TmState state = startState;
+    long steps = 0;
+    while (state instanceof TmState.Run run) {
+      var symbol = tape.getOrDefault(head[0], Symbol.BLANK);
+      var rule = table.get(new Key(run, symbol));
+      if (rule == null) {
+        state = TmState.halt();
+      } else {
+        if (rule.write() instanceof Symbol.Blank) tape.remove(head[0]);
+        else tape.put(head[0], rule.write());
+        head[0] +=
+            switch (rule.move()) {
+              case R -> 1;
+              case L -> -1;
+              case N -> 0;
+            };
+        state = rule.nextState();
+      }
+      steps++;
+    }
+    return new FastStats(steps, tape.size());
+  }
+
+  /// Result of a `runFast` execution: step count and number of marks written.
+  public record FastStats(long steps, long marks) {}
 
   /// Returns a lazy [java.util.stream.Stream] of every configuration visited, from
   /// `initial` through (and including) the first halted configuration.
