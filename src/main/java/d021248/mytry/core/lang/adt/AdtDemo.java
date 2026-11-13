@@ -41,7 +41,7 @@ public final class AdtDemo {
         List.of(
             JsonValue.NULL,
             JsonValue.of(true),
-            JsonValue.of(3.14),
+            JsonValue.of(Math.PI),
             JsonValue.of("hello"),
             JsonValue.arr(),
             JsonValue.obj("k", JsonValue.of(1)));
@@ -86,7 +86,7 @@ public final class AdtDemo {
         v ->
             v.fold(
                 () -> "<null>",
-                b -> b ? "YES" : "NO",
+                b -> b.booleanValue() ? "YES" : "NO",
                 n -> "NUM(" + n + ")",
                 s -> "STR(" + s + ")",
                 elems -> "ARR[" + elems.size() + "]",
@@ -160,7 +160,7 @@ public final class AdtDemo {
   static Either<String, Integer> parseAge(String input) {
     try {
       return Either.right(Integer.parseInt(input));
-    } catch (NumberFormatException e) {
+    } catch (NumberFormatException _) {
       return Either.left("Not a number: " + input);
     }
   }
