@@ -5,6 +5,10 @@
 Functional programming patterns in Java 25 (`d021248.mytry.core.lang.fp`, `d021248.mytry.core.lang.adt`).
 Java 25, Maven build. Extracted from [my-try](https://github.com/d021248/my-try).
 
+> **Architectural excellence is not a means but a goal.**
+> No ad-hoc solutions. No classes with more than one responsibility. No hidden side effects.
+> No premature abstractions. Every design decision is explicit and justified — the code is the learning material.
+
 ---
 
 ## Build & Test
