@@ -1,7 +1,7 @@
 package d021248.mytry.core.lang.fp.functions.decorators;
 
-import d021248.mytry.core.utils.Stopwatch;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.function.Function;
 
 /// Function decorators — composable wrappers over `Function<A, B>`.
@@ -35,11 +35,18 @@ public interface FunctionalDecorators {
 
   static <A, B> Function<A, B> withTiming(String name, Function<A, B> f) {
     return input -> {
-      var sw = Stopwatch.start();
+      var t0 = System.nanoTime();
       var result = f.apply(input);
-      System.out.println("[%s] %s".formatted(name, sw.elapsed()));
+      System.out.println("[%s] %s".formatted(name, elapsed(t0)));
       return result;
     };
+  }
+
+  private static String elapsed(long t0) {
+    var nanos = System.nanoTime() - t0;
+    if (nanos < 1_000_000L) return "%d µs".formatted(nanos / 1_000L);
+    if (nanos < 1_000_000_000L) return "%d ms".formatted(nanos / 1_000_000L);
+    return String.format(Locale.ROOT, "%.2f s", nanos / 1_000_000_000.0);
   }
 
   static <A, B> Function<A, B> withRetry(int maxAttempts, Function<A, B> f) {
