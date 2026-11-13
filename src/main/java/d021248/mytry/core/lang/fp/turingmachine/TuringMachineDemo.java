@@ -6,7 +6,7 @@ import static d021248.mytry.core.lang.fp.turingmachine.TmState.*;
 
 import java.util.List;
 
-/// Two classic Turing Machine programs, shown as executable documentation.
+/// Two classic Turing Machine programs with step-by-step trace output.
 ///
 /// ## 1 — Unary increment
 ///
@@ -39,7 +39,6 @@ public class TuringMachineDemo {
     System.out.println("=== Unary increment: 3 → 4 ===");
     runUnaryIncrement();
 
-    System.out.println();
     System.out.println("=== 3-state Busy Beaver ===");
     runBusyBeaver3();
   }
@@ -53,17 +52,16 @@ public class TuringMachineDemo {
 
     var tm =
         TuringMachine.builder()
-            .on(scan, MARK, scan, MARK, R) // keep scanning right
-            .on(scan, BLANK, halt(), MARK, N) // write the new mark and halt
+            .on(scan, MARK, scan, MARK, R)
+            .on(scan, BLANK, halt(), MARK, N)
             .build();
 
     var tape = Tape.of(List.of(MARK, MARK, MARK));
-    var config = Configuration.initial(scan, tape);
+    var initial = Configuration.initial(scan, tape);
 
-    System.out.println("Before: " + config.tape().display());
-    var result = tm.run(config);
-    System.out.println("After:  " + result.tape().display());
-    System.out.println("Halted: " + result.halted());
+    var steps = printTrace(tm, initial);
+    long marks = markCount(steps.getLast());
+    System.out.printf("  → %d marks%n%n", marks);
   }
 
   // ---------------------------------------------------------------------------
@@ -71,27 +69,50 @@ public class TuringMachineDemo {
   // ---------------------------------------------------------------------------
 
   static void runBusyBeaver3() {
-    var A = (TmState.Run) run("A");
-    var B = (TmState.Run) run("B");
-    var C = (TmState.Run) run("C");
+    var stateA = (TmState.Run) run("A");
+    var stateB = (TmState.Run) run("B");
+    var stateC = (TmState.Run) run("C");
 
     var tm =
         TuringMachine.builder()
-            .on(A, BLANK, run("B"), MARK, R)
-            .on(A, MARK, run("C"), MARK, L)
-            .on(B, BLANK, run("A"), MARK, L)
-            .on(B, MARK, run("B"), MARK, R)
-            .on(C, BLANK, run("B"), MARK, L)
-            .on(C, MARK, halt(), MARK, R)
+            .on(stateA, BLANK, run("B"), MARK, R)
+            .on(stateA, MARK, run("C"), MARK, L)
+            .on(stateB, BLANK, run("A"), MARK, L)
+            .on(stateB, MARK, run("B"), MARK, R)
+            .on(stateC, BLANK, run("B"), MARK, L)
+            .on(stateC, MARK, halt(), MARK, R)
             .build();
 
-    var config = Configuration.initial(A);
-    var result = tm.run(config);
+    var initial = Configuration.initial(stateA);
+    var steps = printTrace(tm, initial);
+    long marks = markCount(steps.getLast());
+    System.out.printf("  → %d marks  (expected 6)%n%n", marks);
+  }
 
-    System.out.println("Tape:   " + result.tape().display());
-    long marks =
-        result.tape().zipper().toList().stream().filter(s -> s instanceof Symbol.Mark).count();
-    System.out.println("Marks:  " + marks + "  (expected 6)");
-    System.out.println("Halted: " + result.halted());
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  private static List<Configuration> printTrace(TuringMachine tm, Configuration initial) {
+    System.out.println();
+    System.out.printf(" %4s │ %-8s │ %s%n", "Step", "State", "Tape");
+    System.out.println("──────┼──────────┼────────────────────────────────");
+
+    var configs = tm.trace(initial).toList();
+    for (int i = 0; i < configs.size(); i++) {
+      var cfg = configs.get(i);
+      var stateName =
+          switch (cfg.state()) {
+            case TmState.Run(var name) -> name;
+            case TmState.Halt _ -> "HALT";
+          };
+      System.out.printf(" %4d │ %-8s │ %s%n", i, stateName, cfg.tape().display());
+    }
+    System.out.println();
+    return configs;
+  }
+
+  private static long markCount(Configuration config) {
+    return config.tape().zipper().toList().stream().filter(s -> s instanceof Symbol.Mark).count();
   }
 }

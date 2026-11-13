@@ -3,6 +3,8 @@ package d021248.mytry.core.lang.fp.turingmachine;
 import d021248.mytry.core.lang.fp.trampoline.Bounce;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /// A Turing Machine — an immutable transition table that drives a `Configuration`
 /// step by step until halt.
@@ -43,6 +45,17 @@ public record TuringMachine(Map<Key, Rule> table) {
   // Execution
   // -------------------------------------------------------------------------
 
+  /// Computes exactly one transition from a non-halted `config`.
+  /// Returns the successor `Configuration`, or an implicit-halt configuration
+  /// if no rule is defined for the current (state, symbol) pair.
+  private Configuration transition(Configuration config) {
+    var run = (TmState.Run) config.state();
+    var symbol = config.tape().read();
+    var rule = table.get(new Key(run, symbol));
+    if (rule == null) return new Configuration(TmState.halt(), config.tape());
+    return new Configuration(rule.nextState(), config.tape().write(rule.write()).move(rule.move()));
+  }
+
   /// Returns the next `Bounce` step for `config`.
   ///
   /// - If already halted → `Bounce.done(config)`.
@@ -50,21 +63,29 @@ public record TuringMachine(Map<Key, Rule> table) {
   /// - Otherwise → `Bounce.more(…)` with the successor configuration.
   public Bounce<Configuration> step(Configuration config) {
     if (config.halted()) return Bounce.done(config);
-    var run = (TmState.Run) config.state();
-    var symbol = config.tape().read();
-    var rule = table.get(new Key(run, symbol));
-    if (rule == null) {
-      return Bounce.done(new Configuration(TmState.halt(), config.tape()));
-    }
-    var next =
-        new Configuration(rule.nextState(), config.tape().write(rule.write()).move(rule.move()));
-    return Bounce.more(() -> step(next));
+    var next = transition(config);
+    return next.halted() ? Bounce.done(next) : Bounce.more(() -> step(next));
   }
 
   /// Runs the machine to completion and returns the halted `Configuration`.
   /// Stack-safe for arbitrarily many steps.
   public Configuration run(Configuration initial) {
     return Bounce.run(step(initial));
+  }
+
+  /// Returns a lazy [java.util.stream.Stream] of every configuration visited, from
+  /// `initial` through (and including) the first halted configuration.
+  ///
+  /// The stream is finite and safe to collect.  Each element is one machine step.
+  public Stream<Configuration> trace(Configuration initial) {
+    return Stream.iterate(
+            Optional.of(initial),
+            Optional::isPresent,
+            opt -> {
+              var c = opt.get();
+              return c.halted() ? Optional.empty() : Optional.of(transition(c));
+            })
+        .map(Optional::get);
   }
 
   // -------------------------------------------------------------------------
