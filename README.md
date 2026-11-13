@@ -41,6 +41,7 @@ Part of the [`d021248`](https://github.com/d021248) learning suite alongside
 | `fp/selective/` | `SelectiveOpt` — selective applicative |
 | `fp/tagless/` | Tagless Final — abstract algebras over effect type `F` |
 | `fp/trampoline/` | Stack-safe tail recursion |
+| `fp/turingmachine/` | Turing Machine — immutable transition table, builder, step-by-step trace |
 | `fp/typeclass/` | Eq, Show, Semigroup, Monoid |
 | `fp/typelevel/` | HList, type witnesses, type-level programming |
 | `fp/zipper/` | `ListZipper` — focus + context, comonad operations |
