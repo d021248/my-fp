@@ -2,8 +2,8 @@
 
 [![Java](https://img.shields.io/badge/Java-25-orange?logo=openjdk)](https://openjdk.org/projects/jdk/25/)
 [![Build](https://img.shields.io/badge/Build-Maven-blue?logo=apachemaven)](https://maven.apache.org/)
-[![CI](https://github.com/d021248/my-fp/actions/workflows/ci.yml/badge.svg)](https://github.com/d021248/my-fp/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/d021248/my-fp/branch/main/graph/badge.svg)](https://codecov.io/gh/d021248/my-fp)
+[![CI](https://github.com/d021248/my-fp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/d021248/my-fp/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/d021248/my-fp/branch/main/graph/badge.svg?branch=main)](https://codecov.io/gh/d021248/my-fp)
 
 Functional programming patterns in Java 25: algebraic data types, monads, optics, parser
 combinators, and more. Extracted from [my-try](https://github.com/d021248/my-try).
