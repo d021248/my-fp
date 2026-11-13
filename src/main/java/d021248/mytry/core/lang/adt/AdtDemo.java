@@ -2,7 +2,9 @@ package d021248.mytry.core.lang.adt;
 
 import module java.base;
 
-import d021248.mytry.core.lang.adt.JsonValue.*;
+import d021248.mytry.core.lang.adt.JsonValue.JArr;
+import d021248.mytry.core.lang.adt.JsonValue.JObj;
+import d021248.mytry.core.lang.adt.JsonValue.JStr;
 
 /// Demonstrates algebraic data types (ADTs) in Java using sealed interfaces
 /// and records — the Java equivalent of Haskell's `data` or Rust's `enum`.
@@ -138,21 +140,21 @@ public final class AdtDemo {
 
     System.out.println(
         """
-				  OOP Visitor:
-				    - Add a variant → modify every Visitor subclass
-				    - Runtime type check (or forget accept())
-				    - 2 classes per variant (variant + visit method)
+              OOP Visitor:
+                - Add a variant → modify every Visitor subclass
+                - Runtime type check (or forget accept())
+                - 2 classes per variant (variant + visit method)
 
-				  ADT (sealed + switch):
-				    - Add a variant → compiler flags every incomplete switch
-				    - Compile-time exhaustiveness
-				    - Zero boilerplate — records + pattern matching
+              ADT (sealed + switch):
+                - Add a variant → compiler flags every incomplete switch
+                - Compile-time exhaustiveness
+                - Zero boilerplate — records + pattern matching
 
-				  Trade-off:
-				    - ADTs are great when variants are fixed and operations grow
-				    - Visitor is great when operations are fixed and variants grow
-				    - Java's sealed types give you the ADT option that was missing before
-				""");
+              Trade-off:
+                - ADTs are great when variants are fixed and operations grow
+                - Visitor is great when operations are fixed and variants grow
+                - Java's sealed types give you the ADT option that was missing before
+            """);
   }
 
   // ── helper ───────────────────────────────────────────────────────────

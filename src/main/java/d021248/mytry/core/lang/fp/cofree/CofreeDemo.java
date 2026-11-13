@@ -12,11 +12,11 @@ public final class CofreeDemo {
     System.out.println("\nFirst 10 naturals: " + nats.take(10));
 
     // Fibonacci via unfold
-    record FibState(long a, long b) {
-    }
-    var fibs = CofreeStream.unfold(
-        new FibState(0L, 1L),
-        s -> new CofreeStream.Pair<>(s.a(), new FibState(s.b(), s.a() + s.b())));
+    record FibState(long a, long b) {}
+    var fibs =
+        CofreeStream.unfold(
+            new FibState(0L, 1L),
+            s -> new CofreeStream.Pair<>(s.a(), new FibState(s.b(), s.a() + s.b())));
     System.out.println("First 10 fibs:     " + fibs.take(10));
 
     // Running sum: extend to compute head + next at each position
